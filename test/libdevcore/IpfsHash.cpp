@@ -45,7 +45,8 @@ BOOST_AUTO_TEST_CASE(test_small)
 BOOST_AUTO_TEST_CASE(test_medium)
 {
 	// 131000 works, 131071 does not.
-	size_t length = 131000;//131071;
+	// TODO it seems to be an error in the sha2 library, though.
+	size_t length = 131071;//131071;
 	string data;
 	data.resize(length, 0);
 	BOOST_REQUIRE_EQUAL(data.size(), length);

@@ -78,6 +78,7 @@ bytes dev::ipfsHash(string _data)
 
 	cout << toHex(blockData) << endl;
 	cout << toHex(blockData.size()) << endl;
+	cout << "Hash: " << toHex(picosha2::hash256(std::move(blockData))) << endl;
 	// Multihash: sha2-256, 256 bits
 	bytes hash = bytes{0x12, 0x20} + picosha2::hash256(std::move(blockData));
 	return hash;
