@@ -30,6 +30,7 @@ function test_fn { npm run test; }
 function zeppelin_test
 {
     OPTIMIZER_LEVEL=1
+    FORCE_ABIv2=true
     setup https://github.com/OpenZeppelin/openzeppelin-solidity.git master
     run_install install_fn
 
