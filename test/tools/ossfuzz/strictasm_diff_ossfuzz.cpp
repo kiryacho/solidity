@@ -80,6 +80,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* _data, size_t _size)
 	{
 		yulFuzzerUtil::interpret(
 			os1,
+			*EVMDialect::strictAssemblyForEVMObjects(langutil::EVMVersion()),
 			stack.parserResult()->code
 		);
 	}
@@ -96,6 +97,7 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* _data, size_t _size)
 	{
 		yulFuzzerUtil::interpret(
 			os2,
+			*EVMDialect::strictAssemblyForEVMObjects(langutil::EVMVersion()),
 			stack.parserResult()->code,
 			(yul::test::yul_fuzzer::yulFuzzerUtil::maxSteps * 1.5)
 		);

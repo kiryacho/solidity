@@ -27,6 +27,7 @@ struct yulFuzzerUtil
 	static void interpret(
 		std::ostream& _os,
 		std::shared_ptr<yul::Block> _ast,
+		Dialect const& _dialect,
 		size_t _maxSteps = maxSteps,
 		size_t _maxTraceSize = maxTraceSize,
 		size_t _maxMemory = maxMemory

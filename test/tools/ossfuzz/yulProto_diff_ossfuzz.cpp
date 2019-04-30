@@ -23,8 +23,9 @@
 #include <src/libfuzzer/libfuzzer_macro.h>
 
 #include <libyul/AssemblyStack.h>
-#include <liblangutil/EVMVersion.h>
+#include <libyul/backends/evm/EVMDialect.h>
 #include <libyul/Exceptions.h>
+#include <liblangutil/EVMVersion.h>
 
 #include <test/tools/ossfuzz/yulFuzzerCommon.h>
 
@@ -76,6 +77,7 @@ DEFINE_PROTO_FUZZER(Function const& _input)
 	{
 		yulFuzzerUtil::interpret(
 			os1,
+			*EVMDialect::strictAssemblyForEVMObjects(langutil::EVMVersion()),
 			stack.parserResult()->code
 		);
 	}
