@@ -315,7 +315,7 @@ jobs:
             npm install solhint
       - run:
         name: Test Docs examples
-        command: ./test/docsExamples.sht
+        command: ./test/docsExamples.sh
 
   test_x86_clang7_asan:
     docker:
