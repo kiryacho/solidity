@@ -314,7 +314,6 @@ SOLTMPDIR=$(mktemp -d)
             cp "$REPO_ROOT"/test/.solhint.json "$SOLTMPDIR"/.solhint.json
         else
             echo "node is installed, installing solhint"
-            npm install -g solhint
             cp "$REPO_ROOT"/test/.solhint.json "$SOLTMPDIR"/.solhint.json
         fi
     else
@@ -351,7 +350,7 @@ SOLTMPDIR=$(mktemp -d)
         compileFull $opts "$SOLTMPDIR/$f"
     done
 )
-rm -rf "$SOLTMPDIR"
+# rm -rf "$SOLTMPDIR"
 echo "Done."
 
 printTask "Testing library checksum..."
