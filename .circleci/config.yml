@@ -311,11 +311,10 @@ jobs:
       - checkout
       - run:
           name: JS deps
-          command: |
-            npm install solhint
+          command: npm install solhint
       - run:
-        name: Test Docs examples
-        command: ./test/docsExamples.sh
+          name: Test Docs examples
+          command: ./test/docsExamples.sh
 
   test_x86_clang7_asan:
     docker:
