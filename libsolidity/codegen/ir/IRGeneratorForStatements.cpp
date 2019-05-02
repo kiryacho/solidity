@@ -22,6 +22,7 @@
 
 #include <libsolidity/codegen/ir/IRGenerationContext.h>
 #include <libsolidity/codegen/YulUtilFunctions.h>
+#include <libsolidity/codegen/ABIFunctions.h>
 #include <libsolidity/ast/TypeProvider.h>
 
 #include <libyul/AsmPrinter.h>
@@ -301,6 +302,62 @@ void IRGeneratorForStatements::endVisit(FunctionCall const& _functionCall)
 			")\n";
 		break;
 	}
+	case FunctionType::Kind::Event:
+	{
+		auto const& event = dynamic_cast<EventDefinition const&>(functionType.declaration());
+		unsigned numIndexed = 0;
+		TypePointers paramTypes = functionType.parameterTypes();
+		ABIFunctions abi(m_context.evmVersion(), m_context.functionCollector());
+
+		vector<string> indexedArgs;
+		for (unsigned arg = arguments.size(); arg > 0; --arg)
+			if (event.parameters()[arg - 1]->isIndexed())
+			{
+				if (auto const& referenceType = dynamic_cast<ReferenceType const*>(paramTypes[arg - 1]))
+				{
+					// -> append to indexed
+					abi.tupleEncoderPacked(
+						{arguments[arg - 1]->annotation().type},
+						{referenceType}
+					);
+					utils().toSizeAfterFreeMemoryPointer();
+					m_context << Instruction::KECCAK256;
+				}
+				else
+				{
+					// -> append to indexed
+					solAssert(paramTypes[arg - 1]->isValueType(), "");
+					utils().convertType(
+						*arguments[arg - 1]->annotation().type,
+						*paramTypes[arg - 1],
+						true
+					);
+				}
+			}
+		if (!event.isAnonymous())
+		{
+			// -> append to indexed
+			m_context << u256(h256::Arith(dev::keccak256(function.externalSignature())));
+			++numIndexed;
+		}
+		solAssert(indexedArgs.size() <= 4, "Too many indexed arguments.");
+		// Copy all non-indexed arguments to memory (data)
+		// Memory position is only a hack and should be removed once we have free memory pointer.
+		TypePointers nonIndexedArgTypes;
+		TypePointers nonIndexedParamTypes;
+		for (unsigned arg = 0; arg < arguments.size(); ++arg)
+			if (!event.parameters()[arg]->isIndexed())
+			{
+				arguments[arg]->accept(*this);
+				nonIndexedArgTypes.push_back(arguments[arg]->annotation().type);
+				nonIndexedParamTypes.push_back(paramTypes[arg]);
+			}
+		utils().fetchFreeMemoryPointer();
+		utils().abiEncode(nonIndexedArgTypes, nonIndexedParamTypes);
+		// need: topic1 ... topicn memsize memstart
+		utils().toSizeAfterFreeMemoryPointer();
+		m_context << logInstruction(numIndexed);
+		break;	}
 	default:
 		solUnimplemented("");
 	}
