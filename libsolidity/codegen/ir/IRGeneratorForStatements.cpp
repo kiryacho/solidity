@@ -219,7 +219,7 @@ void IRGeneratorForStatements::endVisit(BinaryOperation const& _binOp)
 	}
 }
 
-bool IRGeneratorForStatements::visit(FunctionCall const& _functionCall)
+void IRGeneratorForStatements::endVisit(FunctionCall const& _functionCall)
 {
 	solUnimplementedAssert(
 		_functionCall.annotation().kind == FunctionCallKind::FunctionCall ||
@@ -233,13 +233,12 @@ bool IRGeneratorForStatements::visit(FunctionCall const& _functionCall)
 	{
 		solAssert(funcType->category() == Type::Category::TypeType, "Expected category to be TypeType");
 		solAssert(_functionCall.arguments().size() == 1, "Expected one argument for type conversion");
-		_functionCall.arguments().front()->accept(*this);
 
 		defineExpression(_functionCall) <<
 			expressionAsType(*_functionCall.arguments().front(), *_functionCall.annotation().type) <<
 			"\n";
 
-		return false;
+		return;
 	}
 
 	FunctionTypePointer functionType = dynamic_cast<FunctionType const*>(funcType);
@@ -273,14 +272,10 @@ bool IRGeneratorForStatements::visit(FunctionCall const& _functionCall)
 	{
 		vector<string> args;
 		for (unsigned i = 0; i < arguments.size(); ++i)
-		{
-			arguments[i]->accept(*this);
-
 			if (functionType->takesArbitraryParameters())
 				args.emplace_back(m_context.variable(*arguments[i]));
 			else
 				args.emplace_back(expressionAsType(*arguments[i], *parameterTypes[i]));
-		}
 
 		if (auto identifier = dynamic_cast<Identifier const*>(&_functionCall.expression()))
 		{
@@ -293,11 +288,9 @@ bool IRGeneratorForStatements::visit(FunctionCall const& _functionCall)
 					"(" <<
 					joinHumanReadable(args) <<
 					")\n";
-				return false;
+				return;
 			}
 		}
-
-		_functionCall.expression().accept(*this);
 
 		// @TODO The function can very well return multiple vars.
 		args = vector<string>{m_context.variable(_functionCall.expression())} + args;
@@ -311,7 +304,6 @@ bool IRGeneratorForStatements::visit(FunctionCall const& _functionCall)
 	default:
 		solUnimplemented("");
 	}
-	return false;
 }
 
 bool IRGeneratorForStatements::visit(InlineAssembly const& _inlineAsm)
