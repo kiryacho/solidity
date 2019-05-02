@@ -309,6 +309,8 @@ jobs:
       TERM: xterm
     steps:
       - checkout
+      - attach_workspace:
+          at: build
       - run:
           name: JS deps
           command: npm install solhint
